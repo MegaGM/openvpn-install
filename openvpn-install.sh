@@ -420,29 +420,3 @@ key-direction 1
   echo "Your client configuration is available at" ~/"$CLIENT.ovpn"
   echo "If you want to add more clients, you simply need to run this script again!"
 fi
-
-
-# Exit if ufw is not installed
-if [ ! -f /etc/ufw/before.rules ] || [ ! -f /etc/default/ufw ]
-then
-  exit
-fi
-
-cd /etc/ufw
-
-if ! grep -Fxq "# START MEGA OPENVPN RULES" ./before.rules
-then
-  echo -e "# START MEGA OPENVPN RULES
-# NAT table rules
-*nat
-:POSTROUTING ACCEPT [0:0]
-# Allow traffic from OpenVPN client to venet0 (change to the interface you discovered!)
--A POSTROUTING -s 10.8.0.0/8 -o venet0 -j MASQUERADE
-COMMIT
-# END MEGA OPENVPN RULES
-  \n\n$(cat ./before.rules)" > ./before.rules
-fi
-
-sed -i '/DEFAULT_FORWARD_POLICY="DROP"/c\DEFAULT_FORWARD_POLICY="ACCEPT"' /etc/default/ufw
-
-echo "UFW rules have been changed"
